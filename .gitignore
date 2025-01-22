@@ -5,3 +5,8 @@ out/
 
 .idea/
 **.iml
+test.properties
+tmp/
+log/
+agent/
+target/

@@ -1,0 +1,156 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.redhat.insights.runtimes</groupId>
+  <artifactId>insights-operator-ocp-integration-test</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>Insights operator OCP integration test</name>
+
+  <properties>
+    <xtf.version>0.35</xtf.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <version.junit.jupiter>5.11.4</version.junit.jupiter>
+    <version.assertj>3.27.3</version.assertj>
+
+    <versions.log4j>2.24.2</versions.log4j>
+    <version.avaitiltiy>4.2.2</version.avaitiltiy>
+    <version.commons.io>2.18.0</version.commons.io>
+
+    <maven.compiler.version>3.13.0</maven.compiler.version>
+    <maven.compiler.release.version>17</maven.compiler.release.version>	
+    <maven.surefire.plugin.version>3.5.0</maven.surefire.plugin.version>
+    <maven.clean.plugin.version>3.4.0</maven.clean.plugin.version>
+  </properties>
+
+  <dependencies>
+    <!-- Project versions -->
+    <dependency>
+      <groupId>cz.xtf</groupId>
+      <artifactId>core</artifactId>
+      <version>${xtf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cz.xtf</groupId>
+      <artifactId>junit5</artifactId>
+      <version>${xtf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cz.xtf</groupId>
+      <artifactId>http-client</artifactId>
+      <version>${xtf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cz.xtf</groupId>
+      <artifactId>test-helpers</artifactId>
+      <version>${xtf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>cz.xtf</groupId>
+      <artifactId>builder</artifactId>
+      <version>${xtf.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${version.commons.io}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${version.junit.jupiter}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${version.junit.jupiter}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${version.junit.jupiter}</version>
+    </dependency>
+
+    <!-- Logging versions -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${versions.log4j}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${versions.log4j}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${version.assertj}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>${version.avaitiltiy}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.version}</version>
+        <configuration>
+          <release>${maven.compiler.release.version}</release>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>log</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>tmp</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
+        <configuration>
+          <testFailureIgnore>true</testFailureIgnore>
+          <failIfNoTests>true</failIfNoTests>
+          <trimStackTrace>false</trimStackTrace>
+          <runOrder>filesystem</runOrder>
+          <systemProperties>
+            <kubernetes.auth.tryKubeConfig>false</kubernetes.auth.tryKubeConfig>
+          </systemProperties>
+        </configuration>
+      </plugin>      
+    </plugins>
+  </build>
+</project>

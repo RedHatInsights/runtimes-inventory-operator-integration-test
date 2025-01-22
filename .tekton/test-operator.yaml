@@ -110,7 +110,7 @@ spec:
         - name: bundleImage
           value: "$(tasks.parse-metadata.results.component-container-image)"
         - name: namespace
-          value: "$(params.NAMESPACE)"
+          value: "$openshift-operators"
         - name: installTimeout
           value: "$(params.INSTALL_TIMEOUT)"
       taskSpec:
