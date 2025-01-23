@@ -10,8 +10,7 @@ spec:
   params:
     - description: Snapshot of the application
       name: SNAPSHOT
-      # TODO: change
-      default: '{"components": [{"name":"test-app", "containerImage": "quay.io/example/repo:latest"}]}'
+      default: '{"components": [{"name":"runtimes-inventory-operator", "containerImage": "quay.io/insights-runtimes/runtimes-inventory-operator-catalog-prod:latest"}]}'
       type: string
     - description: Namespace where the the Operator bundle will be deployed.
       name: NAMESPACE
@@ -25,7 +24,6 @@ spec:
     - name: parse-metadata
       taskRef:
         resolver: git
-        # TODO: change
         params:
           - name: url
             value: https://github.com/konflux-ci/integration-examples
@@ -102,15 +100,14 @@ spec:
                 value: $(tasks.provision-eaas-space.results.secretRef)
               - name: version
                 value: "$(steps.pick-version.results.version)"
-    # TODO: make it deploy our just-built operator
     - name: deploy-operator
       runAfter:
         - provision-cluster
       params:
         - name: bundleImage
-          value: "$(tasks.parse-metadata.results.component-container-image)"
+          value: "$(params.SNAPSHOT.components.container-image)"
         - name: namespace
-          value: "$openshift-operators"
+          value: "openshift-operators"
         - name: installTimeout
           value: "$(params.INSTALL_TIMEOUT)"
       taskSpec:
@@ -161,7 +158,7 @@ spec:
     - name: clone-repository
       params:
         - name: url
-          value: #TODO: fill git URL
+          value: https://github.com/RedHatInsights/runtimes-inventory-operator-integration-test.git
         - name: revision
           value: "main"
       runAfter:
@@ -199,6 +196,8 @@ spec:
               value: "$(tasks.provision-cluster.results.clusterName)"
             - name: credentials
               value: credentials
+            - name: PROD_OFFLINE_TOKEN
+              value: prod-offline-token
         - name: prepare-tests
           env:
             - name: OCP_API_URL
@@ -209,7 +208,6 @@ spec:
               value: "/credentials/$(steps.get-kubeconfig.results.passwordPath)"
             - name: OCP_PROJECT
               value: "test-project"
-            #TODO: add secret for OFFLINE_TOKEN
           volumeMounts:
             - name: credentials
               mountPath: /credentials
@@ -230,7 +228,7 @@ spec:
               xtf.bm.namespace=$OCP_PROJECT
               
               # Offline token used for insights-stage environment
-              insights.offline.token=$OFFLINE_TOKEN
+              insights.offline.token=$PROD_OFFLINE_TOKEN
               
               # Override test agent URL
               insights.agent=https://repo1.maven.org/maven2/com/redhat/insights/runtimes-agent/1.0.3/runtimes-agent-1.0.3-shaded.jar  
