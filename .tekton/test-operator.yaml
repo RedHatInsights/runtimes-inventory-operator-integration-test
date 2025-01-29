@@ -187,7 +187,14 @@ spec:
       runAfter:
         - deploy-operator
       taskRef:
-        name: git-clone
+        resolver: bundles
+        params:
+          - name: name
+            value: git-clone
+          - name: bundle
+            value: quay.io/konflux-ci/tekton-catalog/task-git-clone:0.1-2cd613778590f1fed0ac2d885872bc3bf66fec37
+          - name: kind
+            value: task
       workspaces:
         - name: output
           workspace: test-source
