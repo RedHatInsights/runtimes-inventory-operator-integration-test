@@ -115,9 +115,10 @@ spec:
             type: string
         results:
           - name: imageName
-            value: "$()"
+            description: "Parsed URL to the operator snapshot image"
         steps:
           - name: parse
+            image: registry.redhat.io/openshift4/ose-cli:latest
             script: |
               echo "Snapshot value: $SNAPSHOT"
               imageName=$(echo $SNAPSHOT | jq -r '.components[0].containerImage')
@@ -221,6 +222,7 @@ spec:
               - name: PROD_OFFLINE_TOKEN
                 value: prod-offline-token
           - name: prepare-tests
+            image: registry.redhat.io/openshift4/ose-cli:latest
             env:
               - name: OCP_API_URL
                 value: $(steps-get-kubeconfig.results.apiServerURL)
