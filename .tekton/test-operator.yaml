@@ -178,68 +178,68 @@ spec:
         volumes:
           - name: credentials
             emptyDir: { }
-      steps:
-        - name: get-kubeconfig
-          ref:
-            resolver: git
+        steps:
+          - name: get-kubeconfig
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/konflux-ci/build-definitions.git
+                - name: revision
+                  value: main
+                - name: pathInRepo
+                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
             params:
-              - name: url
-                value: https://github.com/konflux-ci/build-definitions.git
-              - name: revision
-                value: main
-              - name: pathInRepo
-                value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
-          params:
-            - name: eaasSpaceSecretRef
-              value: $(tasks.provision-eaas-space.results.secretRef)
-            - name: clusterName
-              value: "$(tasks.provision-cluster.results.clusterName)"
-            - name: credentials
-              value: credentials
-            - name: PROD_OFFLINE_TOKEN
-              value: prod-offline-token
-        - name: prepare-tests
-          env:
-            - name: OCP_API_URL
-              value: $(steps-get-kubeconfig.results.apiServerURL)
-            - name: OCP_USERNAME
-              value: $(steps-get-kubeconfig.results.username)
-            - name: OCP_PASSWORD_FILE
-              value: "/credentials/$(steps.get-kubeconfig.results.passwordPath)"
-            - name: OCP_PROJECT
-              value: "test-project"
-          volumeMounts:
-            - name: credentials
-              mountPath: /credentials
-          script: |
-            cd $(workspaces.test-source.path)
-            OCP_PASSWORD=$(cat $OCP_PASSWORD_FILE)
+              - name: eaasSpaceSecretRef
+                value: $(tasks.provision-eaas-space.results.secretRef)
+              - name: clusterName
+                value: "$(tasks.provision-cluster.results.clusterName)"
+              - name: credentials
+                value: credentials
+              - name: PROD_OFFLINE_TOKEN
+                value: prod-offline-token
+          - name: prepare-tests
+            env:
+              - name: OCP_API_URL
+                value: $(steps-get-kubeconfig.results.apiServerURL)
+              - name: OCP_USERNAME
+                value: $(steps-get-kubeconfig.results.username)
+              - name: OCP_PASSWORD_FILE
+                value: "/credentials/$(steps.get-kubeconfig.results.passwordPath)"
+              - name: OCP_PROJECT
+                value: "test-project"
+            volumeMounts:
+              - name: credentials
+                mountPath: /credentials
+            script: |
+              cd $(workspaces.test-source.path)
+              OCP_PASSWORD=$(cat $OCP_PASSWORD_FILE)
+              
+              cat > test.properties << EOF
+                # Specify openshift cluster address
+                xtf.openshift.url=$OCP_API_URL
+                
+                # Credentials to the cluster
+                xtf.openshift.admin.username=$OCP_USERNAME
+                xtf.openshift.admin.password=$OCP_PASSWORD
+                
+                # Specify namespaces where actual tests will be done and where builds will be done
+                xtf.config.master.namespace=$OCP_PROJECT
+                xtf.bm.namespace=$OCP_PROJECT
+                
+                # Offline token used for insights-stage environment
+                insights.offline.token=$PROD_OFFLINE_TOKEN
+                
+                # Override test agent URL
+                insights.agent=https://repo1.maven.org/maven2/com/redhat/insights/runtimes-agent/1.0.3/runtimes-agent-1.0.3-shaded.jar  
+              EOF
+              
+              mvn clean verify --no-transfer-progress
             
-            cat > test.properties << EOF
-              # Specify openshift cluster address
-              xtf.openshift.url=$OCP_API_URL
-              
-              # Credentials to the cluster
-              xtf.openshift.admin.username=$OCP_USERNAME
-              xtf.openshift.admin.password=$OCP_PASSWORD
-              
-              # Specify namespaces where actual tests will be done and where builds will be done
-              xtf.config.master.namespace=$OCP_PROJECT
-              xtf.bm.namespace=$OCP_PROJECT
-              
-              # Offline token used for insights-stage environment
-              insights.offline.token=$PROD_OFFLINE_TOKEN
-              
-              # Override test agent URL
-              insights.agent=https://repo1.maven.org/maven2/com/redhat/insights/runtimes-agent/1.0.3/runtimes-agent-1.0.3-shaded.jar  
-            EOF
-            
-            mvn clean verify --no-transfer-progress
-          
-            # After the tests finish, record the overall result in the RESULT variable
-            if [ "$?" -ne 0 ]
-            then
-              RESULT="FAILURE"
-            else
-              RESULT="SUCCESS"
-            fi
+              # After the tests finish, record the overall result in the RESULT variable
+              if [ "$?" -ne 0 ]
+              then
+                RESULT="FAILURE"
+              else
+                RESULT="SUCCESS"
+              fi
