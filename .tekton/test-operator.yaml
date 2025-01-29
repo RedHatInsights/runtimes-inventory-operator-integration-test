@@ -22,7 +22,7 @@ spec:
       type: string
   workspaces:
     - name: test-source
-      optional: true
+      optional: false
   tasks:
     - name: parse-metadata
       taskRef:
