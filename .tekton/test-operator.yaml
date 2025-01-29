@@ -20,6 +20,9 @@ spec:
       name: INSTALL_TIMEOUT
       default: 5m
       type: string
+  workspaces:
+    - name: test-source
+      optional: true
   tasks:
     - name: parse-metadata
       taskRef:
@@ -100,12 +103,31 @@ spec:
                 value: $(tasks.provision-eaas-space.results.secretRef)
               - name: version
                 value: "$(steps.pick-version.results.version)"
-    - name: deploy-operator
+    - name: parse-snapshot
       runAfter:
         - provision-cluster
       params:
+        - name: SNAPSHOT
+          value: "$(params.SNAPSHOT)"
+      taskSpec:
+        params:
+          - name: SNAPSHOT
+            type: string
+        results:
+          - name: imageName
+            value: "$()"
+        steps:
+          - name: parse
+            script: |
+              echo "Snapshot value: $SNAPSHOT"
+              imageName=$(echo $SNAPSHOT | jq -r '.components[0].containerImage')
+              echo -n ${imageName} > ${results.imageName}
+    - name: deploy-operator
+      runAfter:
+        - parse-snapshot
+      params:
         - name: bundleImage
-          value: "$(params.SNAPSHOT.components.container-image)"
+          value: "$(tasks.parse-snapshot.results.imageName)"
         - name: namespace
           value: "openshift-operators"
         - name: installTimeout
