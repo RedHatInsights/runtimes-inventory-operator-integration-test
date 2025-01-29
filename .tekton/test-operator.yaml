@@ -208,6 +208,8 @@ spec:
         volumes:
           - name: credentials
             emptyDir: { }
+        workspaces:
+          - name: test-source
         steps:
           - name: get-kubeconfig
             ref:
