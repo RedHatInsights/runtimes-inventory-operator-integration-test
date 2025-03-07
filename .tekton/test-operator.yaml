@@ -19,16 +19,6 @@ spec:
       name: INSTALL_TIMEOUT
       default: 5m
       type: string
-  workspaces:
-    - name: test-source
-      optional: false
-      volumeClaimTemplate:
-        spec:
-          accessModes:
-            - ReadWriteMany
-          resources:
-            requests:
-              storage: 1Gi
   tasks:
     - name: parse-metadata
       taskRef:
@@ -184,38 +174,13 @@ spec:
               - --timeout
               - "$(params.installTimeout)"
               - "$(params.bundleImage)"
-    - name: clone-repository
-      params:
-        - name: url
-          value: https://github.com/RedHatInsights/runtimes-inventory-operator-integration-test.git
-        - name: revision
-          value: "main"
-      runAfter:
-        - deploy-operator
-      taskRef:
-        resolver: bundles
-        params:
-          - name: name
-            value: git-clone
-          - name: bundle
-            value: quay.io/konflux-ci/tekton-catalog/task-git-clone:0.1-2cd613778590f1fed0ac2d885872bc3bf66fec37
-          - name: kind
-            value: task
-      workspaces:
-        - name: output
-          workspace: test-source
     - name: run-tests
       runAfter:
-        - clone-repository
-      workspaces:
-        - name: test-source
-          workspace: test-source
+        - deploy-operator
       taskSpec:
         volumes:
           - name: credentials
             emptyDir: { }
-        workspaces:
-          - name: test-source
         steps:
           - name: get-kubeconfig
             ref:
@@ -251,7 +216,6 @@ spec:
               - name: credentials
                 mountPath: /credentials
             script: |
-              cd $(workspaces.test-source.path)
               OCP_PASSWORD=$(cat $OCP_PASSWORD_FILE)
               
               cat > test.properties << EOF
