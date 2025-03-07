@@ -280,10 +280,16 @@ spec:
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: PipelineRun for insights integration operator test
+  name: insights-operator-IT-run
 spec:
   pipelineRef:
     name: insights-operator-IT
   workspaces:
     - name: test-source
-      emptyDir: {}
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 1Gi
