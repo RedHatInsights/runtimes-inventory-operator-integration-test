@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: Integration tests for insights operator
+  name: insights-operator-IT
 spec:
   description: |
     An integration test which provisions an ephemeral Hypershift cluster and deploys an Operator
@@ -276,3 +276,14 @@ spec:
               else
                 RESULT="SUCCESS"
               fi
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: PipelineRun for insights integration operator test
+spec:
+  pipelineRef:
+    name: insights-operator-IT
+  workspaces:
+    - name: test-source
+      emptyDir: {}
