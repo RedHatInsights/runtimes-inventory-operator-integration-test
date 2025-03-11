@@ -13,7 +13,7 @@ spec:
       type: string
     - description: Namespace where the the Operator bundle will be deployed.
       name: NAMESPACE
-      default: default
+      default: openshift-operators
       type: string
     - description: Duration to wait for bundle installation to complete before failing.
       name: INSTALL_TIMEOUT
@@ -106,7 +106,7 @@ spec:
         - name: bundleImage
           value: "$(tasks.parse-metadata.results.component-container-image)"
         - name: namespace
-          value: "openshift-operators"
+          value: "$(params.NAMESPACE)"
         - name: installTimeout
           value: "$(params.INSTALL_TIMEOUT)"
       taskSpec:
