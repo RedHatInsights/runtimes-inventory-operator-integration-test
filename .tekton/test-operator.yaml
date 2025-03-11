@@ -101,10 +101,10 @@ spec:
                 value: "$(steps.pick-version.results.version)"
     - name: deploy-operator
       runAfter:
-        - parse-snapshot
+        - provision-cluster
       params:
         - name: bundleImage
-          value: "$(tasks.parse-snapshot.results.component-container-image)"
+          value: "$(tasks.parse-metadata.results.component-container-image)"
         - name: namespace
           value: "openshift-operators"
         - name: installTimeout
