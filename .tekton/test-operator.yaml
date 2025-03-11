@@ -99,32 +99,12 @@ spec:
                 value: $(tasks.provision-eaas-space.results.secretRef)
               - name: version
                 value: "$(steps.pick-version.results.version)"
-    - name: parse-snapshot
-      runAfter:
-        - provision-cluster
-      params:
-        - name: SNAPSHOT
-          value: "$(params.SNAPSHOT)"
-      taskSpec:
-        params:
-          - name: SNAPSHOT
-            type: string
-        results:
-          - name: imageName
-            description: "Parsed URL to the operator snapshot image"
-        steps:
-          - name: parse
-            image: registry.redhat.io/openshift4/ose-cli:latest
-            script: |
-              echo "Snapshot value: $SNAPSHOT"
-              imageName=$(echo $SNAPSHOT | jq -r '.components[0].containerImage')
-              echo -n ${imageName} > ${results.imageName}
     - name: deploy-operator
       runAfter:
         - parse-snapshot
       params:
         - name: bundleImage
-          value: "$(tasks.parse-snapshot.results.imageName)"
+          value: "$(tasks.parse-snapshot.results.component-container-image)"
         - name: namespace
           value: "openshift-operators"
         - name: installTimeout
